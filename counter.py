@@ -1,70 +1,138 @@
 import tkinter as tk
-import time
+from tkinter import font
 
-class Timer:
+class StopwatchApp:
+    """
+    A simple stopwatch application built with tkinter, suitable for a Raspberry Pi.
+    """
     def __init__(self, root):
+        """
+        Initialize the application.
+        
+        Args:
+            root (tk.Tk): The main tkinter window.
+        """
         self.root = root
-        self.root.title("Time Clock")
+        self.root.title("Raspberry Pi Timer")
+        # Configure the window to be full screen for better visibility on a Pi display
+        # You can comment this out for development on a desktop
+        self.root.attributes('-fullscreen', True) 
+        self.root.configure(bg='black')
 
-        self.seconds = 0
-        self.minutes = 0
-        self.hours = 0
-        self.days = 0
-
-        self.label = tk.Label(root, text=self.format_time(), font=("Helvetica", 48))
-        self.label.pack(pady=50)
-
+        # State variables
         self.running = False
-        self.start_time = None
+        self.seconds = 0
 
-        start_button = tk.Button(root, text="Start", command=self.start_timer)
-        start_button.pack(side=tk.LEFT, padx=10)
+        # Style configuration
+        self.time_font = font.Font(family='Helvetica', size=120, weight='bold')
+        self.button_font = font.Font(family='Helvetica', size=40)
 
-        #stop_button = tk.Button(root, text="Stop", command=self.stop_timer)
-        #stop_button.pack(side=tk.LEFT, padx=10)
+        # Time display label
+        # The label will show the time in HH:MM:SS format.
+        self.time_label = tk.Label(
+            self.root, 
+            text="00:00:00", 
+            font=self.time_font, 
+            fg='white', 
+            bg='black'
+        )
+        self.time_label.pack(expand=True)
 
-        reset_button = tk.Button(root, text="Reset", command=self.reset_timer)
-        reset_button.pack(side=tk.LEFT, padx=10)
+        # Frame to hold the control buttons
+        button_frame = tk.Frame(self.root, bg='black')
+        button_frame.pack(fill='x', side='bottom', pady=50)
 
-    def format_time(self):
-        return f"{self.days:02}:{self.hours:02}:{self.minutes:02}:{self.seconds:02}"
+        # Start/Stop Button
+        self.start_button = tk.Button(
+            button_frame, 
+            text="Start", 
+            font=self.button_font,
+            command=self.toggle_start_stop,
+            bg='#28a745', # Green
+            fg='white',
+            activebackground='#218838',
+            activeforeground='white',
+            bd=0,
+            padx=20,
+            pady=10
+        )
+        self.start_button.pack(side='left', expand=True, fill='x', padx=20)
+        
+        # Reset Button
+        self.reset_button = tk.Button(
+            button_frame, 
+            text="Reset", 
+            font=self.button_font,
+            command=self.reset,
+            bg='#dc3545', # Red
+            fg='white',
+            activebackground='#c82333',
+            activeforeground='white',
+            bd=0,
+            padx=20,
+            pady=10
+        )
+        self.reset_button.pack(side='right', expand=True, fill='x', padx=20)
+        
+        # Add a quit button to exit fullscreen mode easily
+        self.quit_button = tk.Button(
+            self.root,
+            text="X",
+            command=self.root.destroy,
+            bg="black",
+            fg="red",
+            font=("Helvetica", 20),
+            bd=0,
+            relief="flat"
+        )
+        self.quit_button.place(x=10, y=10)
 
-    def update_timer(self):
+
+    def update_time(self):
+        """
+        Increments the timer by one second and updates the display label.
+        Schedules itself to run again after 1 second if the timer is running.
+        """
         if self.running:
-            elapsed_time = time.time() - self.start_time
-            total_seconds = int(elapsed_time)
+            self.seconds += 1
+            # Format seconds into HH:MM:SS
+            hours = self.seconds // 3600
+            minutes = (self.seconds % 3600) // 60
+            secs = self.seconds % 60
+            time_string = f"{hours:02d}:{minutes:02d}:{secs:02d}"
+            self.time_label.config(text=time_string)
+            # Schedule the next update
+            self.root.after(1000, self.update_time)
 
-            self.days = total_seconds // (24 * 3600)
-            remaining_seconds = total_seconds % (24 * 3600)
-
-            self.hours = remaining_seconds // 3600
-            remaining_seconds %= 3600
-
-            self.minutes = remaining_seconds // 60
-            self.seconds = remaining_seconds % 60
-
-            self.label.config(text=self.format_time())
-            self.root.after(1000, self.update_timer) # Update every 1000 ms (1 second)
-
-    def start_timer(self):
-        if not self.running:
+    def toggle_start_stop(self):
+        """
+        Toggles the running state of the stopwatch.
+        """
+        if self.running:
+            # If it's running, stop it
+            self.running = False
+            self.start_button.config(text="Start", bg='#28a745', activebackground='#218838')
+        else:
+            # If it's stopped, start it
             self.running = True
-            self.start_time = time.time()
-            self.update_timer()
+            self.start_button.config(text="Stop", bg='#007bff', activebackground='#0069d9') # Blue for stop
+            # Start the update loop
+            self.update_time()
 
-    def stop_timer(self):
+    def reset(self):
+        """
+        Stops the timer and resets the counter and display to zero.
+        """
         self.running = False
-
-    def reset_timer(self):
-        self.stop_timer()
         self.seconds = 0
-        self.minutes = 0
-        self.hours = 0
-        self.days = 0
-        self.label.config(text=self.format_time())
-        self.start_time = None
+        self.time_label.config(text="00:00:00")
+        self.start_button.config(text="Start", bg='#28a745', activebackground='#218838')
+
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    timer = Timer(root)
-    root.mainloop()
+    # Create the main window
+    main_window = tk.Tk()
+    
+    # Instantiate and run the application
+    app = StopwatchApp(main_window)
+    main_window.mainloop()
