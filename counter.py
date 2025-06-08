@@ -30,7 +30,7 @@ canvas = tk.Canvas(root, width=1920, height=1080)
 canvas.pack()
 
 image_index = 0  # Start with the first image
-image_names = [f"{i+1}.png" for i in range(5)] # Example - adjust to your images
+image_names = [f"{i+1}.jpg" for i in range(5)] # Example - adjust to your images
 
 def start_button_callback():
     global image_index
