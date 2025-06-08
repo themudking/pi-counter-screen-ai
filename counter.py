@@ -73,6 +73,12 @@ class StopwatchApp:
             pady=10
         )
         self.start_button.pack(side='left', expand=True, fill='x', padx=20)
+
+        self.image_label = tk.Label(
+            time_display_frame,
+            bg='black'
+        )
+        self.image_label.pack() # Pack the image label
         
         # Reset Button
         self.reset_button = tk.Button(
@@ -106,6 +112,8 @@ class StopwatchApp:
         self.image_folder = "img"  # Define the image folder path
         self.image_paths = [] # List to store paths of images in the folder
         self.current_image_index = 0
+
+        self.load_images()  # Load images from the specified folder
 
 
     def update_time(self):
