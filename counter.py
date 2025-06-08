@@ -1,13 +1,10 @@
 import tkinter as tk
 from tkinter import font
-import os  # Import the 'os' module for file system operations
-import time # Import the 'time' module to control timing
 
 class StopwatchApp:
     """
     A simple stopwatch application built with tkinter, suitable for a Raspberry Pi.
     This version includes a day counter on a separate line that only appears when days > 0.
-    Now also displays images sequentially from an image folder.
     """
     def __init__(self, root):
         """
@@ -29,7 +26,7 @@ class StopwatchApp:
 
         # Style configuration
         self.days_font = font.Font(family='Helvetica', size=80, weight='bold')
-        self.time_font = font.Font(family='Helvetica', size=220, weight='bold')
+        self.time_font = font.Font(family='Helvetica', size=64, weight='bold')
         self.button_font = font.Font(family='Helvetica', size=48)
 
         # Main frame to hold the time and day labels for centering
@@ -104,12 +101,6 @@ class StopwatchApp:
         )
         self.quit_button.place(x=10, y=10)
 
-        # Image display setup
-        self.image_folder = "images"  # Folder containing images
-        self.image_index = 0
-        self.image_path = os.path.join(self.image_folder, f"image{self.image_index}.png") # Assuming .png files
-        self.image_label = tk.Label(time_display_frame, bg='black')
-        self.image_label.place(x=10, y=10)  # Initial placement
 
     def update_time(self):
         """
@@ -163,16 +154,6 @@ class StopwatchApp:
         self.time_label.config(text="00:00:00")
         self.start_button.config(text="Start", bg='#28a745', activebackground='#218838')
 
-    def display_next_image(self):
-        """Displays the next image in the sequence."""
-        self.image_index += 1
-        self.image_path = os.path.join(self.image_folder, f"image{self.image_index}.png") # Assuming .png files
-        try:
-            img = tk.PhotoImage(file=self.image_path)
-            self.image_label.config(image=img)
-            self.image_label.image = img  # Keep a reference to prevent garbage collection
-        except tk.TclError as e:
-            print(f"Error loading image {self.image_path}: {e}")
 
 if __name__ == "__main__":
     # Create the main window
@@ -180,8 +161,4 @@ if __name__ == "__main__":
     
     # Instantiate and run the application
     app = StopwatchApp(main_window)
-    
-    # Schedule image display every 5 seconds (adjust as needed)
-    main_window.after(5000, lambda: main_window.after(5000, app.display_next_image)) # Call display_next_image repeatedly
-
     main_window.mainloop()
