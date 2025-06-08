@@ -10,7 +10,7 @@ def update_count():
     global counter, label
     counter += 1
     label.config(text=f"{label_text} {counter}")
-    root.after(update_interval * 1000) # Schedule the next update
+    root.after(update_interval * 200) # Schedule the next update
 
 
 root = tk.Tk()
