@@ -4,7 +4,7 @@ import time
 class Timer:
     def __init__(self, root):
         self.root = root
-        self.root.title("Upward Timer")
+        self.root.title("Time Clock")
 
         self.seconds = 0
         self.minutes = 0
@@ -20,8 +20,8 @@ class Timer:
         start_button = tk.Button(root, text="Start", command=self.start_timer)
         start_button.pack(side=tk.LEFT, padx=10)
 
-        stop_button = tk.Button(root, text="Stop", command=self.stop_timer)
-        stop_button.pack(side=tk.LEFT, padx=10)
+        #stop_button = tk.Button(root, text="Stop", command=self.stop_timer)
+        #stop_button.pack(side=tk.LEFT, padx=10)
 
         reset_button = tk.Button(root, text="Reset", command=self.reset_timer)
         reset_button.pack(side=tk.LEFT, padx=10)
@@ -52,8 +52,8 @@ class Timer:
             self.start_time = time.time()
             self.update_timer()
 
-    def stop_timer(self):
-        self.running = False
+    #def stop_timer(self):
+    #    self.running = False
 
     def reset_timer(self):
         self.stop_timer()
