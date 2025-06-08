@@ -26,7 +26,7 @@ class StopwatchApp:
 
         # Style configuration
         self.days_font = font.Font(family='Helvetica', size=80, weight='bold')
-        self.time_font = font.Font(family='Helvetica', size=140, weight='bold')
+        self.time_font = font.Font(family='Helvetica', size=220, weight='bold')
         self.button_font = font.Font(family='Helvetica', size=48)
 
         # Main frame to hold the time and day labels for centering
