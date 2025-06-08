@@ -1,7 +1,7 @@
 import RPi.GPIO as GPIO
-import time
+import tkinter as tk
+import time  # Import the time module
 import os
-import tkinter as tk  # Import the Tkinter module
 
 # Configuration - Adjust these to your needs
 SCREEN_WIDTH = 160
@@ -99,3 +99,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+root = tk.Tk()
+root.title("Image Display") # Set a title for the window
+root.geometry("600x400") # Set an initial size for the window
+
+root.mainloop() # Start the Tkinter event loop
