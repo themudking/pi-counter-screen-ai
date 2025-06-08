@@ -3,7 +3,7 @@ import time
 import os
 
 IMAGE_FOLDER = "img"  # Or your image folder name
-IMAGE_ROTATE_INTERVAL = 3000 # seconds
+IMAGE_ROTATE_INTERVAL = 2 # seconds
 BUTTON_START_PIN = 17
 BUTTON_RESET_PIN = 18
 
@@ -24,13 +24,13 @@ def rotate_images():
 
 root = tk.Tk()
 root.title("Image Display")
-root.geometry("1920x1080")
+root.geometry("600x400")
 
-canvas = tk.Canvas(root, width=1920, height=1080)
+canvas = tk.Canvas(root, width=600, height=400)
 canvas.pack()
 
 image_index = 0  # Start with the first image
-image_names = [f"{i+1}.jpg" for i in range(5)] # Example - adjust to your images
+image_names = [f"image{i+1}.png" for i in range(5)] # Example - adjust to your images
 
 def start_button_callback():
     global image_index
