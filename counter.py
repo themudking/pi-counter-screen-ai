@@ -4,6 +4,7 @@ from tkinter import font
 class StopwatchApp:
     """
     A simple stopwatch application built with tkinter, suitable for a Raspberry Pi.
+    This version includes a day counter on a separate line.
     """
     def __init__(self, root):
         """
@@ -24,19 +25,33 @@ class StopwatchApp:
         self.seconds = 0
 
         # Style configuration
-        self.time_font = font.Font(family='Helvetica', size=120, weight='bold')
-        self.button_font = font.Font(family='Helvetica', size=40)
+        self.days_font = font.Font(family='Helvetica', size=80, weight='bold')
+        self.time_font = font.Font(family='Helvetica', size=140, weight='bold')
+        self.button_font = font.Font(family='Helvetica', size=48)
 
-        # Time display label
-        # The label will show the time in HH:MM:SS format.
+        # Main frame to hold the time and day labels for centering
+        time_display_frame = tk.Frame(self.root, bg='black')
+        time_display_frame.pack(expand=True)
+        
+        # Day display label
+        self.days_label = tk.Label(
+            time_display_frame,
+            text="0 days",
+            font=self.days_font,
+            fg='white',
+            bg='black'
+        )
+        self.days_label.pack()
+
+        # Time display label (HH:MM:SS)
         self.time_label = tk.Label(
-            self.root, 
+            time_display_frame, 
             text="00:00:00", 
             font=self.time_font, 
             fg='white', 
             bg='black'
         )
-        self.time_label.pack(expand=True)
+        self.time_label.pack()
 
         # Frame to hold the control buttons
         button_frame = tk.Frame(self.root, bg='black')
@@ -90,17 +105,25 @@ class StopwatchApp:
 
     def update_time(self):
         """
-        Increments the timer by one second and updates the display label.
+        Increments the timer by one second and updates the display labels.
         Schedules itself to run again after 1 second if the timer is running.
         """
         if self.running:
             self.seconds += 1
-            # Format seconds into HH:MM:SS
-            hours = self.seconds // 3600
+            # Calculate days, hours, minutes, seconds
+            days = self.seconds // 86400
+            hours = (self.seconds % 86400) // 3600
             minutes = (self.seconds % 3600) // 60
             secs = self.seconds % 60
+            
+            # Format the strings for the labels
+            days_string = f"{days} day{'s' if days != 1 else ''}"
             time_string = f"{hours:02d}:{minutes:02d}:{secs:02d}"
+            
+            # Update the labels
+            self.days_label.config(text=days_string)
             self.time_label.config(text=time_string)
+            
             # Schedule the next update
             self.root.after(1000, self.update_time)
 
@@ -121,10 +144,11 @@ class StopwatchApp:
 
     def reset(self):
         """
-        Stops the timer and resets the counter and display to zero.
+        Stops the timer and resets the counter and displays to zero.
         """
         self.running = False
         self.seconds = 0
+        self.days_label.config(text="0 days")
         self.time_label.config(text="00:00:00")
         self.start_button.config(text="Start", bg='#28a745', activebackground='#218838')
 
