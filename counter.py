@@ -10,7 +10,7 @@ def main():
     while True:
         try:
             # Display the counter
-            print(f"{counter:0>4d}", end=" ")  # Formatted to 4 digits with leading zeros
+            print(counter, end=" ")
             time.sleep(1) # Update every second
 
         except KeyboardInterrupt:
