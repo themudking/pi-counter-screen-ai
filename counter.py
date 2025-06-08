@@ -1,4 +1,5 @@
 import RPi.GPIO as GPIO  # Import the GPIO library
+import tkinter as tk # Import tkinter for GUI elements (if needed)
 import time
 import os
 
@@ -12,6 +13,10 @@ IMAGE_ROTATE_INTERVAL = 300  # Rotate every 300 seconds (5 minutes)
 BUTTON_START_PIN = 17
 BUTTON_RESET_PIN = 27
 
+
+root = tk.Tk()
+root.title("Image Display") # Set a title for the window
+root.geometry("600x400") # Set an initial size for the window
 
 def setup_gpio():
     GPIO.setmode(GPIO.BCM) # Use BCM pin numbering
@@ -70,3 +75,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
+root.mainloop()
