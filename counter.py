@@ -1,22 +1,25 @@
+import tkinter as tk
 import time
 
-# Configuration (we'll expand on these later)
-background_color = "#FFFFFF" # White
-image_path = "img/image1.png"
+# Configuration
+window_title = "Counter App"
+label_text = "Count: 0"
+update_interval = 1  # seconds
 
-def main():
-    print("Application started!")
-    counter = 0
-    while True:
-        try:
-            # Display the counter
-            print(counter, end=" ")
-            time.sleep(1) # Update every second
-
-        except KeyboardInterrupt:
-            print("\nApplication stopped.")
-            break
+def update_count():
+    global counter, label
+    counter += 1
+    label.config(text=f"{label_text} {counter}")
+    root.after(update_interval * 1000) # Schedule the next update
 
 
-if __name__ == "__main__":
-    main()
+root = tk.Tk()
+root.title(window_title)
+
+counter = 0
+label = tk.Label(root, text=label_text, font=("Helvetica", 24))
+label.pack(pady=20)
+
+update_count()  # Start the counter update loop
+
+root.mainloop()
