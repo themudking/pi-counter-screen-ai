@@ -4,7 +4,7 @@ from tkinter import font
 class StopwatchApp:
     """
     A simple stopwatch application built with tkinter, suitable for a Raspberry Pi.
-    This version includes a day counter on a separate line.
+    This version includes a day counter on a separate line that only appears when days > 0.
     """
     def __init__(self, root):
         """
@@ -33,15 +33,14 @@ class StopwatchApp:
         time_display_frame = tk.Frame(self.root, bg='black')
         time_display_frame.pack(expand=True)
         
-        # Day display label
+        # Day display label - created but not displayed until needed
         self.days_label = tk.Label(
             time_display_frame,
-            text="0 days",
             font=self.days_font,
             fg='white',
             bg='black'
         )
-        self.days_label.pack()
+        # Note: The label is not packed here. It will be packed in update_time().
 
         # Time display label (HH:MM:SS)
         self.time_label = tk.Label(
@@ -116,12 +115,15 @@ class StopwatchApp:
             minutes = (self.seconds % 3600) // 60
             secs = self.seconds % 60
             
-            # Format the strings for the labels
-            days_string = f"{days} day{'s' if days != 1 else ''}"
+            # Conditionally show and update the days label
+            if days > 0:
+                days_string = f"{days} day{'s' if days != 1 else ''}"
+                self.days_label.config(text=days_string)
+                # If the label is not visible, pack it above the time label
+                if not self.days_label.winfo_ismapped():
+                    self.days_label.pack(before=self.time_label)
+
             time_string = f"{hours:02d}:{minutes:02d}:{secs:02d}"
-            
-            # Update the labels
-            self.days_label.config(text=days_string)
             self.time_label.config(text=time_string)
             
             # Schedule the next update
@@ -148,7 +150,7 @@ class StopwatchApp:
         """
         self.running = False
         self.seconds = 0
-        self.days_label.config(text="0 days")
+        self.days_label.pack_forget() # Hide the days label
         self.time_label.config(text="00:00:00")
         self.start_button.config(text="Start", bg='#28a745', activebackground='#218838')
 
