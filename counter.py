@@ -52,8 +52,8 @@ class Timer:
             self.start_time = time.time()
             self.update_timer()
 
-    #def stop_timer(self):
-    #    self.running = False
+    def stop_timer(self):
+        self.running = False
 
     def reset_timer(self):
         self.stop_timer()
