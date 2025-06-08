@@ -1,57 +1,72 @@
-import tkinter as tk
+import RPi.GPIO as GPIO  # Import the GPIO library
 import time
 import os
 
-IMAGE_FOLDER = "img"  # Or your image folder name
-IMAGE_ROTATE_INTERVAL = 2 # seconds
-BUTTON_START_PIN = 17
-BUTTON_RESET_PIN = 18
+# Configuration - Adjust these to your needs
+SCREEN_WIDTH = 160 # Example width, adjust based on your screen
+SCREEN_HEIGHT = 128 # Example height, adjust based on your screen
+IMAGE_FOLDER = "img"
+IMAGE_ROTATE_INTERVAL = 300  # Rotate every 300 seconds (5 minutes)
 
-def display_image(canvas, image_path):
-    try:
-        photo = tk.PhotoImage(file=os.path.join(IMAGE_FOLDER, image_path))
-        photo_id = canvas.create_image(250, 250, anchor=tk.CENTER, image=photo)
-        return photo_id
-    except Exception as e:
-        print(f"Error loading image: {e}")
+# Initialize GPIO pins - Replace with your actual pin numbers
+BUTTON_START_PIN = 17
+BUTTON_RESET_PIN = 27
+
+
+def setup_gpio():
+    GPIO.setmode(GPIO.BCM) # Use BCM pin numbering
+    GPIO.setup(BUTTON_START_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(BUTTON_RESET_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+def get_image_path():
+    files = [f for f in os.listdir(IMAGE_FOLDER) if os.path.isfile(os.path.join(IMAGE_FOLDER, f))]
+    if files:
+        return os.path.join(IMAGE_FOLDER, max(files)) # Get the highest numbered file
+    else:
         return None
 
-def rotate_images():
-    global image_index
-    image_index = (image_index + 1) % len(image_names)
-    display_image(canvas, image_names[image_index])
+def display_counter():
+    # This is a placeholder - Replace with your actual screen drawing code
+    print("Counter Display:", time.strftime("%H:%M"))
 
 
-root = tk.Tk()
-root.title("Image Display")
-root.geometry("600x400")
+def main():
+    setup_gpio()
 
-canvas = tk.Canvas(root, width=600, height=400)
-canvas.pack()
+    start_button_pressed = False # Flag to track start button state
+    counter_running = False
 
-image_index = 0  # Start with the first image
-image_names = [f"image{i+1}.png" for i in range(5)] # Example - adjust to your images
+    try:
+        while True:
+            # Check for button presses
+            if not GPIO.input(BUTTON_START_PIN):
+                print("Start Button Pressed")
+                if not counter_running:
+                    start_button_pressed = True
+                    counter_running = True
+                    time.sleep(1) # Debounce the start button
 
-def start_button_callback():
-    global image_index
-    rotate_images()
+            if GPIO.input(BUTTON_RESET_PIN):
+                print("Reset Button Pressed")
+                counter_running = False
+                # Reset counter to 00:00:00 here (implementation needed)
 
-def reset_button_callback():
-    global image_index
-    image_index = 0
-    rotate_images()
+            if counter_running:
+                display_counter()
+                time.sleep(1) # Update every second
 
-
-start_button = tk.Button(root, text="Start", command=start_button_callback)
-start_button.pack(side=tk.LEFT)
-
-reset_button = tk.Button(root, text="Reset", command=reset_button_callback)
-reset_button.pack(side=tk.RIGHT)
-
-
-# Initial image display
-display_image(canvas, image_names[image_index])
+            # Image rotation - run this periodically
+            time.sleep(IMAGE_ROTATE_INTERVAL)
+            image_path = get_image_path()
+            if image_path:
+                print("Rotating Image:", image_path)
+                # Add code here to display the image on your screen
 
 
+    except KeyboardInterrupt:
+        print("Program stopped")
+    finally:
+        GPIO.cleanup() # Clean up GPIO pins on exit
 
-root.mainloop()
+if __name__ == "__main__":
+    main()
