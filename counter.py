@@ -24,7 +24,7 @@ class StopwatchApp:
         # Color Configuration
         self.bg_color = '#000000' # Black background
         self.fg_color = '#FFFFFF' # White text
-        self.transparent_color = '#000000' # Transparent color for the background
+        self.transparent_color = 'lime green' # Transparent color for the background
         self.quit_fg_color = '#FF0000' # Red for the quit button text
 
         # Configure the window
