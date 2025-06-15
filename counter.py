@@ -44,7 +44,7 @@ class StopwatchApp:
             time_display_frame,
             font=self.days_font,
             fg='white',
-            bg='#333333'
+            bg="#042A7A"
         )
         # Note: The label is not packed here. It will be packed in update_time().
 
