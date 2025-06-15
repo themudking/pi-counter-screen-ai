@@ -15,15 +15,20 @@ class StopwatchApp:
         """
         self.root = root
         self.root.title("Raspberry Pi Timer")
-        # Configure the window to be full screen for better visibility on a Pi display
-        # You can comment this out for development on a desktop
-        self.root.attributes('-fullscreen', True) 
-        self.root.configure(bg='black', cursor='none') # Hide cursor by default
-
+        
         # --- Configuration ---
         # Set to True to show days on a separate line after 24 hours.
         # Set to False to let the hours count up indefinitely (e.g., 25:00:00).
         self.show_days = False
+
+        # Color Configuration
+        self.bg_color = '#000000' # Black background
+        self.fg_color = '#FFFFFF' # White text
+        self.quit_fg_color = '#FF0000' # Red for the quit button text
+
+        # Configure the window
+        self.root.attributes('-fullscreen', True) 
+        self.root.configure(bg=self.bg_color, cursor='none') # Hide cursor by default
 
         # State variables
         self.running = False
@@ -36,15 +41,15 @@ class StopwatchApp:
         self.button_font = font.Font(family='Helvetica', size=48)
 
         # Main frame to hold the time and day labels for centering
-        time_display_frame = tk.Frame(self.root, bg="#3E0668")
+        time_display_frame = tk.Frame(self.root, bg=self.bg_color)
         time_display_frame.pack(expand=True)
         
         # Day display label - created but not displayed until needed
         self.days_label = tk.Label(
             time_display_frame,
             font=self.days_font,
-            fg='white',
-            bg="#000000"  # Black background
+            fg=self.fg_color,
+            bg=self.bg_color
         )
         # Note: The label is not packed here. It will be packed in update_time().
 
@@ -53,13 +58,13 @@ class StopwatchApp:
             time_display_frame, 
             text="00:00:00", 
             font=self.time_font, 
-            fg='white', 
-            bg='black'
+            fg=self.fg_color, 
+            bg=self.bg_color
         )
         self.time_label.pack()
 
         # Frame to hold the control buttons
-        self.button_frame = tk.Frame(self.root, bg='black')
+        self.button_frame = tk.Frame(self.root, bg=self.bg_color)
         self.button_frame.pack(fill='x', side='bottom', pady=50)
 
         # Start/Stop Button
@@ -69,9 +74,9 @@ class StopwatchApp:
             font=self.button_font,
             command=self.toggle_start_stop,
             bg='#28a745', # Green
-            fg='white',
+            fg=self.fg_color,
             activebackground='#218838',
-            activeforeground='white',
+            activeforeground=self.fg_color,
             bd=0,
             padx=20,
             pady=10
@@ -85,9 +90,9 @@ class StopwatchApp:
             font=self.button_font,
             command=self.reset,
             bg='#dc3545', # Red
-            fg='white',
+            fg=self.fg_color,
             activebackground='#c82333',
-            activeforeground='white',
+            activeforeground=self.fg_color,
             bd=0,
             padx=20,
             pady=10
@@ -99,8 +104,8 @@ class StopwatchApp:
             self.root,
             text="X",
             command=self.root.destroy,
-            bg="black",
-            fg="red",
+            bg=self.bg_color,
+            fg=self.quit_fg_color,
             font=("Helvetica", 20),
             bd=0,
             relief="flat"
