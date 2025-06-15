@@ -36,7 +36,7 @@ class StopwatchApp:
         self.button_font = font.Font(family='Helvetica', size=48)
 
         # Main frame to hold the time and day labels for centering
-        time_display_frame = tk.Frame(self.root, bg='black')
+        time_display_frame = tk.Frame(self.root, bg="#3E0668")
         time_display_frame.pack(expand=True)
         
         # Day display label - created but not displayed until needed
@@ -44,7 +44,7 @@ class StopwatchApp:
             time_display_frame,
             font=self.days_font,
             fg='white',
-            bg="#31038C"  # Black default
+            bg="#000000"  # Black background
         )
         # Note: The label is not packed here. It will be packed in update_time().
 
