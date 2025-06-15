@@ -4,7 +4,7 @@ from tkinter import font
 class StopwatchApp:
     """
     A simple stopwatch application built with tkinter, suitable for a Raspberry Pi.
-    This version includes a day counter on a separate line that only appears when days > 0.
+    This version includes a day counter and buttons that hide on inactivity.
     """
     def __init__(self, root):
         """
@@ -18,15 +18,16 @@ class StopwatchApp:
         # Configure the window to be full screen for better visibility on a Pi display
         # You can comment this out for development on a desktop
         self.root.attributes('-fullscreen', True) 
-        self.root.configure(bg='black')
+        self.root.configure(bg='black', cursor='none') # Hide cursor by default
 
         # State variables
         self.running = False
         self.seconds = 0
+        self.hide_job = None # To store the 'after' job ID
 
         # Style configuration
         self.days_font = font.Font(family='Helvetica', size=80, weight='bold')
-        self.time_font = font.Font(family='Helvetica', size=224, weight='bold')
+        self.time_font = font.Font(family='Helvetica', size=220, weight='bold')
         self.button_font = font.Font(family='Helvetica', size=48)
 
         # Main frame to hold the time and day labels for centering
@@ -53,12 +54,12 @@ class StopwatchApp:
         self.time_label.pack()
 
         # Frame to hold the control buttons
-        button_frame = tk.Frame(self.root, bg='black')
-        button_frame.pack(fill='x', side='bottom', pady=50)
+        self.button_frame = tk.Frame(self.root, bg='black')
+        self.button_frame.pack(fill='x', side='bottom', pady=50)
 
         # Start/Stop Button
         self.start_button = tk.Button(
-            button_frame, 
+            self.button_frame, 
             text="Start", 
             font=self.button_font,
             command=self.toggle_start_stop,
@@ -74,7 +75,7 @@ class StopwatchApp:
         
         # Reset Button
         self.reset_button = tk.Button(
-            button_frame, 
+            self.button_frame, 
             text="Reset", 
             font=self.button_font,
             command=self.reset,
@@ -100,6 +101,38 @@ class StopwatchApp:
             relief="flat"
         )
         self.quit_button.place(x=10, y=10)
+
+        # Bind mouse movement to show buttons and schedule them to hide
+        self.root.bind('<Motion>', self.handle_mouse_move)
+        # Initially schedule the buttons to hide
+        self.schedule_hide()
+
+
+    def schedule_hide(self):
+        """Schedules the buttons and cursor to be hidden after a delay."""
+        self.hide_job = self.root.after(3000, self.hide_controls)
+
+    def hide_controls(self):
+        """Hides the button frame and the mouse cursor."""
+        self.button_frame.pack_forget()
+        self.root.config(cursor='none')
+
+    def handle_mouse_move(self, event=None):
+        """Shows the buttons and cursor and schedules them to be hidden again."""
+        # Cancel any pending hide job
+        if self.hide_job:
+            self.root.after_cancel(self.hide_job)
+            self.hide_job = None
+        
+        # Show the cursor
+        self.root.config(cursor='')
+
+        # Show the buttons if they are hidden
+        if not self.button_frame.winfo_ismapped():
+            self.button_frame.pack(fill='x', side='bottom', pady=50)
+        
+        # Schedule to hide them again
+        self.schedule_hide()
 
 
     def update_time(self):
