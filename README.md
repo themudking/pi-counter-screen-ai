@@ -43,26 +43,32 @@ Restart=always
 WantedBy=graphical.target
 
 Explanation of the file:
+[Unit]
+Description=My Python Counter Application
+# This makes sure we wait for the graphical login screen to be ready
+After=graphical.target
 
-[Unit] Section:
+[Service]
+# --- CRITICAL: Set the user that owns the script and will run it ---
+User=counter
+Group=counter
 
-Description: A brief description of your service.
+# --- CRITICAL: Set the working directory to your script's location ---
+WorkingDirectory=/home/counter/counter/pi-counter-screen-ai
 
-After=graphical.target: This is very important. It ensures your script only runs after the Raspberry Pi's graphical desktop environment has finished loading.
+# --- CRITICAL: Set environment variables needed for a GUI app ---
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/counter/.Xauthority
 
-[Service] Section:
+# --- The command to execute ---
+ExecStart=/usr/bin/python3 /home/counter/counter/pi-counter-screen-ai/counter.py
 
-User=pi: Runs the script as the standard pi user.
+# --- Restart behavior ---
+Restart=on-failure
+RestartSec=10
 
-Environment=DISPLAY=:0: This is the crucial part for any GUI application. It tells your script which display to connect to.
-
-ExecStart=/usr/bin/python3 /home/pi/pi-counter-screen-ai/counter.py: The full command to execute your application. It uses the absolute paths for both the Python interpreter and your script.
-
-Restart=always: If your application crashes for any reason, systemd will automatically try to restart it.
-
-[Install] Section:
-
-WantedBy=graphical.target: This enables the service to be started as part of the graphical boot process.
+[Install]
+WantedBy=graphical.target
 
 After pasting the text, save the file by pressing Ctrl+X, then Y, then Enter.
 
