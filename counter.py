@@ -22,7 +22,7 @@ class StopwatchApp:
         self.show_days = False
 
         # Color Configuration
-        self.bg_color = '#000000' # Black background
+        self.bg_color = 'lime green' # Black background
         self.fg_color = '#FFFFFF' # White text
         self.transparent_color = 'lime green' # Transparent color for the background
         self.quit_fg_color = '#FF0000' # Red for the quit button text
