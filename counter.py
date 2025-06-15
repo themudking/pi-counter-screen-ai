@@ -20,6 +20,11 @@ class StopwatchApp:
         self.root.attributes('-fullscreen', True) 
         self.root.configure(bg='black', cursor='none') # Hide cursor by default
 
+        # --- Configuration ---
+        # Set to True to show days on a separate line after 24 hours.
+        # Set to False to let the hours count up indefinitely (e.g., 25:00:00).
+        self.show_days = False
+
         # State variables
         self.running = False
         self.seconds = 0
@@ -147,24 +152,26 @@ class StopwatchApp:
         """
         if self.running:
             self.seconds += 1
-            # Calculate days, hours, minutes, seconds
-            days = self.seconds // 86400
-            hours = (self.seconds % 86400) // 3600
+            
+            if self.show_days:
+                # Logic to show days on a separate line
+                days = self.seconds // 86400
+                hours = (self.seconds % 86400) // 3600
+                if days > 0:
+                    days_string = f"{days} day{'s' if days != 1 else ''}"
+                    self.days_label.config(text=days_string)
+                    if not self.days_label.winfo_ismapped():
+                        self.days_label.pack(before=self.time_label)
+            else:
+                # Logic to let hours accumulate
+                hours = self.seconds // 3600
+            
             minutes = (self.seconds % 3600) // 60
             secs = self.seconds % 60
             
-            # Conditionally show and update the days label
-            if days > 0:
-                days_string = f"{days} day{'s' if days != 1 else ''}"
-                self.days_label.config(text=days_string)
-                # If the label is not visible, pack it above the time label
-                if not self.days_label.winfo_ismapped():
-                    self.days_label.pack(before=self.time_label)
-
             time_string = f"{hours:02d}:{minutes:02d}:{secs:02d}"
             self.time_label.config(text=time_string)
             
-            # Schedule the next update
             self.root.after(1000, self.update_time)
 
     def toggle_start_stop(self):
@@ -188,7 +195,7 @@ class StopwatchApp:
         """
         self.running = False
         self.seconds = 0
-        self.days_label.pack_forget() # Hide the days label
+        self.days_label.pack_forget() # Hide the days label regardless
         self.time_label.config(text="00:00:00")
         self.start_button.config(text="Start", bg='#28a745', activebackground='#218838')
 
