@@ -4,7 +4,7 @@ from tkinter import font
 class StopwatchApp:
     """
     A simple stopwatch application built with tkinter, suitable for a Raspberry Pi.
-    This version includes a day counter and buttons that hide on inactivity.
+    This version includes a day counter and controls that hide on inactivity.
     """
     def __init__(self, root):
         """
@@ -89,7 +89,7 @@ class StopwatchApp:
         )
         self.reset_button.pack(side='right', expand=True, fill='x', padx=20)
         
-        # Add a quit button to exit fullscreen mode easily
+        # Add a quit button that will also hide/show
         self.quit_button = tk.Button(
             self.root,
             text="X",
@@ -102,23 +102,24 @@ class StopwatchApp:
         )
         self.quit_button.place(x=10, y=10)
 
-        # Bind mouse movement to show buttons and schedule them to hide
+        # Bind mouse movement to show controls and schedule them to hide
         self.root.bind('<Motion>', self.handle_mouse_move)
-        # Initially schedule the buttons to hide
+        # Initially schedule the controls to hide
         self.schedule_hide()
 
 
     def schedule_hide(self):
-        """Schedules the buttons and cursor to be hidden after a delay."""
+        """Schedules the controls and cursor to be hidden after a delay."""
         self.hide_job = self.root.after(3000, self.hide_controls)
 
     def hide_controls(self):
-        """Hides the button frame and the mouse cursor."""
+        """Hides the button frame, quit button, and the mouse cursor."""
         self.button_frame.pack_forget()
+        self.quit_button.place_forget()
         self.root.config(cursor='none')
 
     def handle_mouse_move(self, event=None):
-        """Shows the buttons and cursor and schedules them to be hidden again."""
+        """Shows the controls and cursor and schedules them to be hidden again."""
         # Cancel any pending hide job
         if self.hide_job:
             self.root.after_cancel(self.hide_job)
@@ -127,9 +128,13 @@ class StopwatchApp:
         # Show the cursor
         self.root.config(cursor='')
 
-        # Show the buttons if they are hidden
+        # Show the button frame if it's hidden
         if not self.button_frame.winfo_ismapped():
             self.button_frame.pack(fill='x', side='bottom', pady=50)
+
+        # Show the quit button if it's hidden
+        if not self.quit_button.winfo_ismapped():
+            self.quit_button.place(x=10, y=10)
         
         # Schedule to hide them again
         self.schedule_hide()
