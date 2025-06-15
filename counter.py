@@ -24,12 +24,14 @@ class StopwatchApp:
         # Color Configuration
         self.bg_color = '#000000' # Black background
         self.fg_color = '#FFFFFF' # White text
+        self.transparent_color = '#000000' # Transparent color for the background
         self.quit_fg_color = '#FF0000' # Red for the quit button text
 
         # Configure the window
         self.root.attributes('-fullscreen', True) 
-        self.root.configure(bg=self.bg_color, cursor='none') # Hide cursor by default
-
+        self.root.configure(bg=self.transparent_color, cursor='none') # Hide cursor by default
+        self.root.wm_attributes('-transparentcolor', self.transparent_color) # Set the transparent color
+        
         # State variables
         self.running = False
         self.seconds = 0
