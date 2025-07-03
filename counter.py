@@ -46,6 +46,7 @@ class StopwatchApp:
         self.hide_job = None
 
         # Style configuration
+        self.title_font = font.Font(family='Helvetica', size=60, weight='bold')
         self.days_font = font.Font(family='Helvetica', size=80, weight='bold')
         self.time_font = font.Font(family='Helvetica', size=220, weight='bold')
         self.button_font = font.Font(family='Helvetica', size=48)
@@ -68,16 +69,26 @@ class StopwatchApp:
         time_display_frame = tk.Frame(self.root, bg=self.bg_color)
         time_display_frame.pack(expand=True)
         
+        # Title Label
+        self.title_label = tk.Label(
+            time_display_frame, text="50 Hour Prayer Marathon", font=self.title_font,
+            fg=self.fg_color, bg=self.bg_color
+        )
+        self.title_label.pack(pady=(0, 20)) # Add some padding below the title
+
+        # Days Label (conditionally shown)
         self.days_label = tk.Label(
             time_display_frame, font=self.days_font, fg=self.fg_color, bg=self.bg_color
         )
 
+        # Time Label
         self.time_label = tk.Label(
             time_display_frame, text="00:00:00", font=self.time_font, 
             fg=self.fg_color, bg=self.bg_color
         )
         self.time_label.pack()
 
+        # Button Frame
         self.button_frame = tk.Frame(self.root, bg=self.bg_color)
         self.button_frame.pack(fill='x', side='bottom', pady=50)
 
@@ -135,8 +146,9 @@ class StopwatchApp:
 
     def cleanup_gpio(self):
         """Called on script exit to clean up GPIO resources."""
-        print("Cleaning up GPIO...")
-        GPIO.cleanup()
+        if IS_PI:
+            print("Cleaning up GPIO...")
+            GPIO.cleanup()
 
     def schedule_hide(self):
         self.hide_job = self.root.after(3000, self.hide_controls)
