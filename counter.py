@@ -55,6 +55,7 @@ class StopwatchApp:
         self.running = False
         self.seconds = 0
         self.hide_job = None
+        self.photo = None # To hold a reference to the background image
 
         # Style configuration
         self.title_font = font.Font(family='Helvetica', size=60, weight='bold')
@@ -75,62 +76,63 @@ class StopwatchApp:
             atexit.register(self.cleanup_gpio)
 
     def setup_ui(self):
-        """Creates and places all the UI widgets."""
-        time_display_frame = tk.Frame(self.root, bg=self.bg_color)
-        time_display_frame.pack(expand=True)
-        
-        self.title_label = tk.Label(
-            time_display_frame, text="50 Hour Prayer Marathon", font=self.title_font,
-            fg=self.fg_color, bg=self.bg_color
-        )
-        self.title_label.pack(pady=(0, 20))
+        """Creates and places all the UI widgets with a full-screen background image."""
+        # Create a canvas that will fill the screen
+        self.canvas = tk.Canvas(self.root, bg=self.bg_color, highlightthickness=0)
+        self.canvas.pack(fill="both", expand=True)
 
-        self.days_label = tk.Label(
-            time_display_frame, font=self.days_font, fg=self.fg_color, bg=self.bg_color
-        )
-
-        self.time_label = tk.Label(
-            time_display_frame, text="00:00:00", font=self.time_font, 
-            fg=self.fg_color, bg=self.bg_color
-        )
-        self.time_label.pack()
-
-        # Image Label
-        self.image_label = tk.Label(time_display_frame, bg=self.bg_color)
+        # Load and display the background image
         if HAS_PIL and os.path.exists(self.image_path):
             try:
-                # Load and resize the image
-                original_image = Image.open(self.image_path)
-                # Define a max size for the image to fit nicely
-                max_width = 400
-                max_height = 300
-                original_image.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
+                screen_width = self.root.winfo_screenwidth()
+                screen_height = self.root.winfo_screenheight()
                 
-                self.photo = ImageTk.PhotoImage(original_image)
-                self.image_label.config(image=self.photo)
-                self.image_label.pack(pady=20)
+                original_image = Image.open(self.image_path)
+                resized_image = original_image.resize((screen_width, screen_height), Image.Resampling.LANCZOS)
+                
+                self.photo = ImageTk.PhotoImage(resized_image)
+                self.canvas.create_image(0, 0, image=self.photo, anchor="nw")
             except Exception as e:
-                print(f"Error loading image: {e}")
+                print(f"Error loading background image: {e}")
         else:
-             print(f"Image not loaded. PIL installed: {HAS_PIL}, Path exists: {os.path.exists(self.image_path)}")
+             print(f"Background image not loaded. PIL installed: {HAS_PIL}, Path exists: {os.path.exists(self.image_path)}")
 
+        # --- Create text items on the canvas ---
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
 
+        self.canvas.create_text(
+            screen_width / 2, screen_height * 0.25,
+            text="50 Hour Prayer Marathon", font=self.title_font, fill=self.fg_color
+        )
+
+        self.days_text_id = self.canvas.create_text(
+            screen_width / 2, screen_height * 0.45,
+            text="0 days", font=self.days_font, fill=self.fg_color, state='hidden'
+        )
+
+        self.time_text_id = self.canvas.create_text(
+            screen_width / 2, screen_height * 0.5,
+            text="00:00:00", font=self.time_font, fill=self.fg_color, anchor='n'
+        )
+
+        # --- Place standard widgets on top of the canvas ---
         self.button_frame = tk.Frame(self.root, bg=self.bg_color)
-        self.button_frame.pack(fill='x', side='bottom', pady=50)
+        self.button_frame.place(relx=0.5, rely=1.0, relwidth=1.0, y=-50, anchor='s')
 
         self.start_button = tk.Button(
             self.button_frame, text="Start", font=self.button_font,
             command=self.toggle_start_stop, bg='#28a745', fg=self.fg_color,
             activebackground='#218838', activeforeground=self.fg_color, bd=0, padx=20, pady=10
         )
-        self.start_button.pack(side='left', expand=True, fill='x', padx=20)
+        self.start_button.pack(side='left', expand=True, fill='x', padx=20, pady=10)
         
         self.reset_button = tk.Button(
             self.button_frame, text="Reset", font=self.button_font,
             command=self.reset, bg='#dc3545', fg=self.fg_color,
             activebackground='#c82333', activeforeground=self.fg_color, bd=0, padx=20, pady=10
         )
-        self.reset_button.pack(side='right', expand=True, fill='x', padx=20)
+        self.reset_button.pack(side='right', expand=True, fill='x', padx=20, pady=10)
         
         self.quit_button = tk.Button(
             self.root, text="X", command=self.root.destroy, bg=self.bg_color,
@@ -171,7 +173,7 @@ class StopwatchApp:
         self.hide_job = self.root.after(3000, self.hide_controls)
 
     def hide_controls(self):
-        self.button_frame.pack_forget()
+        self.button_frame.place_forget()
         self.quit_button.place_forget()
         self.root.config(cursor='none')
 
@@ -182,7 +184,7 @@ class StopwatchApp:
         
         self.root.config(cursor='')
         if not self.button_frame.winfo_ismapped():
-            self.button_frame.pack(fill='x', side='bottom', pady=50)
+            self.button_frame.place(relx=0.5, rely=1.0, relwidth=1.0, y=-50, anchor='s')
         if not self.quit_button.winfo_ismapped():
             self.quit_button.place(x=10, y=10)
         
@@ -197,9 +199,7 @@ class StopwatchApp:
                 hours = (self.seconds % 86400) // 3600
                 if days > 0:
                     days_string = f"{days} day{'s' if days != 1 else ''}"
-                    self.days_label.config(text=days_string)
-                    if not self.days_label.winfo_ismapped():
-                        self.days_label.pack(before=self.time_label)
+                    self.canvas.itemconfig(self.days_text_id, text=days_string, state='normal')
             else:
                 hours = self.seconds // 3600
             
@@ -207,7 +207,7 @@ class StopwatchApp:
             secs = self.seconds % 60
             
             time_string = f"{hours:02d}:{minutes:02d}:{secs:02d}"
-            self.time_label.config(text=time_string)
+            self.canvas.itemconfig(self.time_text_id, text=time_string)
             
             self.root.after(1000, self.update_time)
 
@@ -223,8 +223,8 @@ class StopwatchApp:
     def reset(self):
         self.running = False
         self.seconds = 0
-        self.days_label.pack_forget()
-        self.time_label.config(text="00:00:00")
+        self.canvas.itemconfig(self.days_text_id, state='hidden')
+        self.canvas.itemconfig(self.time_text_id, text="00:00:00")
         self.start_button.config(text="Start", bg='#28a745', activebackground='#218838')
 
 
