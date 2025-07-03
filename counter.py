@@ -43,10 +43,18 @@ class StopwatchApp:
         self.bg_color = '#000000'
         self.fg_color = '#FFFFFF'
         self.quit_fg_color = '#FF0000'
+        
         # --- Image Configuration ---
-        # Place your image in the same directory as the script or provide a full path.
-        self.image_path = "images/image1.png" # <--- CHANGE THIS TO YOUR IMAGE FILE
-
+        # Create a folder named 'images' in the same directory as this script
+        # and place your background images inside it.
+        self.image_folder = "images"
+        self.image_paths = []
+        if os.path.isdir(self.image_folder):
+            self.image_paths = sorted([
+                os.path.join(self.image_folder, f) for f in os.listdir(self.image_folder)
+                if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))
+            ])
+        
         # Configure the window
         self.root.attributes('-fullscreen', True) 
         self.root.configure(bg=self.bg_color, cursor='none')
@@ -56,6 +64,8 @@ class StopwatchApp:
         self.seconds = 0
         self.hide_job = None
         self.photo = None # To hold a reference to the background image
+        self.current_image_index = 0
+        self.background_image_id = None
 
         # Style configuration
         self.title_font = font.Font(family='Helvetica', size=60, weight='bold')
@@ -81,21 +91,11 @@ class StopwatchApp:
         self.canvas = tk.Canvas(self.root, bg=self.bg_color, highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
 
-        # Load and display the background image
-        if HAS_PIL and os.path.exists(self.image_path):
-            try:
-                screen_width = self.root.winfo_screenwidth()
-                screen_height = self.root.winfo_screenheight()
-                
-                original_image = Image.open(self.image_path)
-                resized_image = original_image.resize((screen_width, screen_height), Image.Resampling.LANCZOS)
-                
-                self.photo = ImageTk.PhotoImage(resized_image)
-                self.canvas.create_image(0, 0, image=self.photo, anchor="nw")
-            except Exception as e:
-                print(f"Error loading background image: {e}")
-        else:
-             print(f"Background image not loaded. PIL installed: {HAS_PIL}, Path exists: {os.path.exists(self.image_path)}")
+        # Create a placeholder for the background image on the canvas
+        self.background_image_id = self.canvas.create_image(0, 0, anchor="nw")
+        
+        # Start the background image rotation
+        self.rotate_background_image()
 
         # --- Create text items on the canvas ---
         screen_width = self.root.winfo_screenwidth()
@@ -139,6 +139,35 @@ class StopwatchApp:
             fg=self.quit_fg_color, font=("Helvetica", 20), bd=0, relief="flat"
         )
         self.quit_button.place(x=10, y=10)
+
+    def rotate_background_image(self):
+        """Loads the next image, sets it as the background, and schedules the next rotation."""
+        if not HAS_PIL or not self.image_paths:
+            print("Cannot rotate images: Pillow not installed or no images found.")
+            return
+
+        try:
+            image_path = self.image_paths[self.current_image_index]
+            
+            screen_width = self.root.winfo_screenwidth()
+            screen_height = self.root.winfo_screenheight()
+            
+            original_image = Image.open(image_path)
+            resized_image = original_image.resize((screen_width, screen_height), Image.Resampling.LANCZOS)
+            
+            self.photo = ImageTk.PhotoImage(resized_image)
+            self.canvas.itemconfig(self.background_image_id, image=self.photo)
+            
+            # Increment index for the next rotation, looping back to the start
+            self.current_image_index = (self.current_image_index + 1) % len(self.image_paths)
+
+        except Exception as e:
+            print(f"Error loading background image '{image_path}': {e}")
+            # Skip to the next image on error
+            self.current_image_index = (self.current_image_index + 1) % len(self.image_paths)
+
+        # Schedule the next rotation in 30 seconds (30000 ms)
+        self.root.after(30000, self.rotate_background_image)
 
     def setup_gpio(self):
         """Sets up the GPIO pins for input with pull-down resistors."""
