@@ -55,7 +55,14 @@ class StopwatchApp:
                 if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))
             ])
         
-        # Configure the window
+        # --- Force full screen geometry ---
+        # This is more robust than relying solely on the '-fullscreen' attribute.
+        # It ensures the window takes up the entire screen space from the start.
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        self.root.geometry(f"{screen_width}x{screen_height}+0+0")
+        
+        # Now set the fullscreen attribute to remove window decorations (like the title bar)
         self.root.attributes('-fullscreen', True) 
         self.root.configure(bg=self.bg_color, cursor='none')
 
